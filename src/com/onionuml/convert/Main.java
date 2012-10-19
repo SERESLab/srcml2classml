@@ -87,6 +87,6 @@ public class Main {
 		}
 		
 		List<UmlRelationshipElement> relationships = saxHandler.getRelationships();
-		
+		relationships.clear();
 	}
 }

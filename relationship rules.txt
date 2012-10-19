@@ -1,0 +1,22 @@
+Generalization:
+If the srcML has an <extends> element as the child of a <class> element, a generalization relationship is formed.
+
+
+Realization:
+If the srcML has an <implements> element as the child of a <class> element, a realization relationship is formed.
+
+
+Dependence:
+Class A depends on Class B if a function in Class A has at least one parameter of the type Class B and there is not any other relationship between Class A and Class B.
+
+
+Composition:
+Class A is composed of Class B if Class A constructs a new instance of Class B as a member variable and there is not an aggregation relationship between Class A and Class B.
+
+
+Aggregation:
+Class B is an aggregate of Class A if a function in Class A returns an object of the type Class B.
+
+
+Association:
+Class A has an association with Class B if Class A has a member variable of type Class B and there is no relationship other than Dependency between Class A and Class B.

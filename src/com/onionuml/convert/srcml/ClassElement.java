@@ -3,6 +3,7 @@ package com.onionuml.convert.srcml;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.onionuml.convert.srcml.RelationshipLink.LinkType;
 import com.onionuml.visplugin.core.UmlAttribute;
 import com.onionuml.visplugin.core.UmlClassElement;
 import com.onionuml.visplugin.core.UmlOperation;
@@ -58,13 +59,41 @@ public class ClassElement implements INamed, ISpecified, IDeclarationContainer {
 	@Override
 	public void addDeclaration(Declaration d) {
 		mDeclarations.add(d);
+		if(d.getInitializationType() == InitializationType.NEWOBJECT){
+			RelationshipLink l = new RelationshipLink();
+			l.setHeadName(d.getTypeRef().getNameRef().toString());
+			l.setLinkType(LinkType.COMPOSES);
+			addLink(l);
+		}
+		else{
+			RelationshipLink l = new RelationshipLink();
+			l.setHeadName(d.getTypeRef().getNameRef().toString());
+			l.setLinkType(LinkType.ASSOCIATES);
+			addLink(l);
+		}
 	}
 	
 	/**
-	 * Adds the specified function to the class.
+	 * Adds the specified function to the class. Creates dependency relationships
+	 * with each of the function's parameter types.
 	 */
 	public void addFunction(Function f){
 		mFunctions.add(f);
+		
+		String retType = f.getTypeRef().toString();
+		if(retType.equals("void") || retType.length() > 0){
+			RelationshipLink l = new RelationshipLink();
+			l.setHeadName(retType);
+			l.setLinkType(LinkType.AGGREGATES);
+			addLink(l);
+		}
+		
+		for(Parameter p : f.getParameterListRef()){
+			RelationshipLink l = new RelationshipLink();
+			l.setHeadName(p.getTypeRef().getNameRef().toString());
+			l.setLinkType(LinkType.DEPENDS);
+			addLink(l);
+		}
 	}
 	
 	/**

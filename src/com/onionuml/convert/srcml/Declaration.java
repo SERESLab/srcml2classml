@@ -8,6 +8,7 @@ public class Declaration implements ITyped, INamed {
 	
 	private Name mName = new Name();
 	private Type mType = new Type();
+	private InitializationType mInitType = InitializationType.NONE;
 	
 	
 	@Override
@@ -33,5 +34,19 @@ public class Declaration implements ITyped, INamed {
 	@Override
 	public Type getTypeRef() {
 		return mType;
+	}
+	
+	/**
+	 * Sets the initialization type of the declaration.
+	 */
+	public void setInitializationType(InitializationType initType){
+		mInitType = initType;
+	}
+	
+	/**
+	 * Returns the initialization type of the declaration.
+	 */
+	public InitializationType getInitializationType(){
+		return mInitType;
 	}
 }

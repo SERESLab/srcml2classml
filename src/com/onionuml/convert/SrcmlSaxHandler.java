@@ -20,6 +20,7 @@ import com.onionuml.convert.srcml.INamed;
 import com.onionuml.convert.srcml.IParameterListContainer;
 import com.onionuml.convert.srcml.ISpecified;
 import com.onionuml.convert.srcml.ITyped;
+import com.onionuml.convert.srcml.InitializationType;
 import com.onionuml.convert.srcml.Name;
 import com.onionuml.convert.srcml.Parameter;
 import com.onionuml.convert.srcml.RelationshipLink;
@@ -102,6 +103,12 @@ public class SrcmlSaxHandler extends DefaultHandler {
 		}
 		else if(qName.equals("extends") || qName.equals("implements")){
 			mObjects.push(new RelationshipLink());
+		}
+		else if(qName.equals("init")){
+			mObjects.push(InitializationType.NONE);
+		}
+		else if(qName.equals("expr")){
+			mObjects.push("");
 		}
 	}
 
@@ -230,6 +237,20 @@ public class SrcmlSaxHandler extends DefaultHandler {
 				e.addLink(l);
 			}
 		}
+		else if(qName.equals("init")){
+			InitializationType initType = (InitializationType)mObjects.pop();
+			if(!mObjects.isEmpty() && mObjects.peek() instanceof Declaration){
+				Declaration parent = (Declaration)mObjects.peek();
+				parent.setInitializationType(initType);
+			}
+		}
+		else if(qName.equals("expr")){
+			String expr = (String)mObjects.pop();
+			if(!mObjects.isEmpty() && mObjects.peek() instanceof InitializationType){
+				mObjects.pop();
+				mObjects.push(InitializationType.parseInitType(expr));
+			}
+		}
 		
 	}
 	
@@ -238,7 +259,7 @@ public class SrcmlSaxHandler extends DefaultHandler {
 		
 		String curElement = mElementNames.peek();
 		
-		if(curElement.equals("specifier") || curElement.equals("index")){
+		if(curElement.equals("specifier") || curElement.equals("index") || curElement.equals("expr")){
 			String s = (String)mObjects.pop();
 			s += new String(ch, start, length);
 			mObjects.push(s);
@@ -263,8 +284,10 @@ public class SrcmlSaxHandler extends DefaultHandler {
 	 * Looks up and builds the relationships among read classes.
 	 */
 	public List<UmlRelationshipElement> getRelationships(){
-		List<UmlRelationshipElement> rels = new ArrayList<UmlRelationshipElement>();
 		
+		consolidateRelationships();
+		
+		List<UmlRelationshipElement> rels = new ArrayList<UmlRelationshipElement>();
 		for(RelationshipLink rl : mAllRelationships){
 			RelationshipType relType = null;
 			switch(rl.getLinkType()){
@@ -301,6 +324,90 @@ public class SrcmlSaxHandler extends DefaultHandler {
 	
 	
 	// PRIVATE METHODS -------------------------------------
+	
+	/*
+	 * Tests whether the list of all relationships currently contains a
+	 * link between the endpoints of the specified link.
+	 */
+	private boolean allContainsLink(RelationshipLink link){
+		for(RelationshipLink testRl : mAllRelationships){
+			if(link.getHeadName().equals(testRl.getHeadName())
+					&& link.getTailName().equals(testRl.getTailName())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/*
+	 * Removes duplicate relationships and relationships that are weaker
+	 * than others with the same endpoints.
+	 */
+	private void consolidateRelationships(){
+		
+		List<RelationshipLink> implementsRelationships = new ArrayList<RelationshipLink>();
+		List<RelationshipLink> aggregatesRelationships = new ArrayList<RelationshipLink>();
+		List<RelationshipLink> composesRelationships = new ArrayList<RelationshipLink>();
+		List<RelationshipLink> dependsRelationships = new ArrayList<RelationshipLink>();
+		List<RelationshipLink> extendsRelationships = new ArrayList<RelationshipLink>();
+		List<RelationshipLink> associatesRelationships = new ArrayList<RelationshipLink>();
+		
+		for(RelationshipLink rl : mAllRelationships){
+			switch(rl.getLinkType()){
+				case IMPLEMENTS:
+					implementsRelationships.add(rl);
+					break;
+				case AGGREGATES:
+					aggregatesRelationships.add(rl);
+					break;
+				case COMPOSES:
+					composesRelationships.add(rl);
+					break;
+				case DEPENDS:
+					dependsRelationships.add(rl);
+					break;
+				case EXTENDS:
+					extendsRelationships.add(rl);
+					break;
+				case ASSOCIATES:
+					associatesRelationships.add(rl);
+					break;
+			}
+		}
+		
+		mAllRelationships.clear();
+		
+		for(RelationshipLink rl : implementsRelationships){
+			if(!allContainsLink(rl)){
+				mAllRelationships.add(rl);
+			}
+		}
+		for(RelationshipLink rl : extendsRelationships){
+			if(!allContainsLink(rl)){
+				mAllRelationships.add(rl);
+			}
+		}
+		for(RelationshipLink rl : aggregatesRelationships){
+			if(!allContainsLink(rl)){
+				mAllRelationships.add(rl);
+			}
+		}
+		for(RelationshipLink rl : composesRelationships){
+			if(!allContainsLink(rl)){
+				mAllRelationships.add(rl);
+			}
+		}
+		for(RelationshipLink rl : associatesRelationships){
+			if(!allContainsLink(rl)){
+				mAllRelationships.add(rl);
+			}
+		}
+		for(RelationshipLink rl : dependsRelationships){
+			if(!allContainsLink(rl)){
+				mAllRelationships.add(rl);
+			}
+		}
+	}
 	
 	/*
 	 * Returns whether the parent element should receive the current name element.
