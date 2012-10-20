@@ -1,10 +1,6 @@
 package com.onionuml.convert;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -15,8 +11,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
-import com.onionuml.visplugin.core.UmlClassElement;
-import com.onionuml.visplugin.core.UmlRelationshipElement;
+import com.onionuml.visplugin.core.UmlClassModel;
 
 public class Main {
 	
@@ -25,9 +20,41 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		
-		//String filename = "/Users/mike/srcml.xml";
-		String filename = "/Users/mike/Downloads/srcML/xstream.xml";
+		if(args.length < 2){
+			System.out.println("Usage: srcml2classml srcml_file out_file [model_name]");
+			System.exit(0);
+		}
 		
+		String inFile = args[0];
+		String outFile = args[1];
+	    String name = (args.length > 2 ? args[2] : "Untitled Model");
+	    
+	    try{
+	    	System.out.println("Reading " + inFile + "...");
+		    SrcmlSaxHandler saxHandler = readSrcmlFile(inFile);
+		    
+		    UmlClassModel model = new UmlClassModel(name, null,
+		    		saxHandler.buildUmlPackages(), saxHandler.buildUmlRelationships());
+		    
+		    System.out.println("Read " + model.getPackages().size() + " packages, "
+		    		+ String.valueOf(saxHandler.getNumClasses()) + " classes, and "
+		    		+ model.getRelationships().size() + " relationships...");
+		    
+		    System.out.print("Writing ClassML file to " + outFile + "...");
+		    model.toFile(outFile);
+		    System.out.println("Done.");
+	    }
+	    catch(Exception e){
+	    	System.err.println("Error parsing file: ");
+	    	System.err.println(e.getMessage());
+	    }
+	}
+	
+	
+	/*
+	 * Reads and parses the specified srcml file.
+	 */
+	private static SrcmlSaxHandler readSrcmlFile(String filename){
 		SAXParser saxParser = null;
 	    try {
 	    	SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -68,25 +95,6 @@ public class Main {
 			throw new RuntimeException("Error reading the specified file.");
 		}
 	    
-	    
-	    String eol = System.getProperty("line.separator");
-	    
-	    Map<String,List<UmlClassElement>> pkgMap = saxHandler.getPackageClassMap();
-	    
-	    Iterator<Entry<String,List<UmlClassElement>>>  itNodes = pkgMap.entrySet().iterator();
-		while (itNodes.hasNext()) {
-			Entry<String,List<UmlClassElement>> pairs = (Entry<String,List<UmlClassElement>>)itNodes.next();
-			
-			System.out.println("Package: " + pairs.getKey() + ", " + pairs.getValue().size() + " classes");
-			
-			for(UmlClassElement c : pairs.getValue()){
-				System.out.println(c.toString() + eol);
-			}
-			
-			System.out.println(eol + "###############################" + eol);
-		}
-		
-		List<UmlRelationshipElement> relationships = saxHandler.getRelationships();
-		relationships.clear();
+	    return saxHandler;
 	}
 }

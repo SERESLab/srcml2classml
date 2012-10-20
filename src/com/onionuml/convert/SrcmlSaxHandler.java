@@ -2,8 +2,10 @@ package com.onionuml.convert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -28,6 +30,7 @@ import com.onionuml.convert.srcml.RelationshipLink.LinkType;
 import com.onionuml.convert.srcml.Type;
 import com.onionuml.visplugin.core.RelationshipType;
 import com.onionuml.visplugin.core.UmlClassElement;
+import com.onionuml.visplugin.core.UmlPackageElement;
 import com.onionuml.visplugin.core.UmlRelationshipElement;
 
 /**
@@ -36,13 +39,17 @@ import com.onionuml.visplugin.core.UmlRelationshipElement;
  */
 public class SrcmlSaxHandler extends DefaultHandler {
 	
+	private static final String IDBASE_CLASS = "class";
+	private static final String IDBASE_RELATIONSHIP = "rel";
+	private static final String IDBASE_PACKAGE = "pkg";
+	
 	// PRIVATE MEMBER VARIABLES --------------------------------
 	
 	private String mLastPackageName = "";
 	private List<String> mLastImports = new ArrayList<String>();
 	
-	private Map<String,List<UmlClassElement>> mPackageClassMap = new HashMap<String,List<UmlClassElement>>();
-	private Map<String,UmlClassElement> mClasses = new HashMap<String,UmlClassElement>();
+	private Map<String,Map<String,UmlClassElement>> mPackageClassMap =
+			new HashMap<String,Map<String,UmlClassElement>>();
 	
 	private Map<String,String> mIdQualifiedNameMap = new HashMap<String,String>();
 	private List<RelationshipLink> mAllRelationships = new ArrayList<RelationshipLink>();
@@ -65,7 +72,7 @@ public class SrcmlSaxHandler extends DefaultHandler {
 		
 		if(qName.equals("class")){
 			String stereotype = attributes.getValue("type");
-			ClassElement c = new ClassElement("class" + String.valueOf(++mNumClasses),
+			ClassElement c = new ClassElement(IDBASE_CLASS + String.valueOf(++mNumClasses),
 					mLastPackageName, (stereotype != null ? stereotype : ""));
 			c.setImports(mLastImports);
 			mLastImports = new ArrayList<String>();
@@ -122,8 +129,7 @@ public class SrcmlSaxHandler extends DefaultHandler {
 			ClassElement c = (ClassElement)mObjects.pop();
 			UmlClassElement e = c.toUmlClassElement();
 			if(e != null){
-				mClasses.put(c.getId(), e);
-				mPackageClassMap.get(c.getPackageName()).add(e);
+				mPackageClassMap.get(c.getPackageName()).put(c.getId(), e);
 				mIdQualifiedNameMap.put(c.getQualifiedName(), c.getId());
 				mAllRelationships.addAll(c.makeQualifiedRelationships());
 			}
@@ -132,7 +138,7 @@ public class SrcmlSaxHandler extends DefaultHandler {
 			String name = (String)mObjects.pop();
 			mLastPackageName = name;
 			if(!mPackageClassMap.containsKey(name)){
-				mPackageClassMap.put(name, new ArrayList<UmlClassElement>());
+				mPackageClassMap.put(name, new HashMap<String,UmlClassElement>());
 			}
 		}
 		else if(qName.equals("import")){
@@ -274,20 +280,45 @@ public class SrcmlSaxHandler extends DefaultHandler {
 	// PUBLIC METHODS -------------------------------------
 	
 	/**
-	 * Gets a reference to the map of packages to the list of classes in each package.
+	 * Returns the number of classes read by the parser.
 	 */
-	public Map<String,List<UmlClassElement>> getPackageClassMap(){
-		return mPackageClassMap;
+	public int getNumClasses(){
+		return mNumClasses;
 	}
 	
 	/**
-	 * Looks up and builds the relationships among read classes.
+	 * Creates uml package objects for each package and class parsed.
 	 */
-	public List<UmlRelationshipElement> getRelationships(){
+	public Map<String,UmlPackageElement> buildUmlPackages(){
+		
+		int numPackages = 0;
+		Map<String,UmlPackageElement> packages = new HashMap<String,UmlPackageElement>();
+		
+		Iterator<Entry<String,Map<String,UmlClassElement>>>  itPackages = mPackageClassMap.entrySet().iterator();
+		while (itPackages.hasNext()) {
+			Entry<String,Map<String,UmlClassElement>> pkgPairs = (Entry<String,Map<String,UmlClassElement>>)itPackages.next();
+			
+			if(pkgPairs.getValue().size() > 0){
+				UmlPackageElement pkg = new UmlPackageElement(pkgPairs.getKey(), pkgPairs.getValue());
+				packages.put(IDBASE_PACKAGE + String.valueOf(++numPackages), pkg);
+			}
+		}
+			
+		return packages;
+	}
+	
+	/**
+	 * Looks up relationships and creates uml relationship objects
+	 * for relationships among parsed classes.
+	 */
+	public Map<String,UmlRelationshipElement> buildUmlRelationships(){
 		
 		consolidateRelationships();
 		
-		List<UmlRelationshipElement> rels = new ArrayList<UmlRelationshipElement>();
+		int numRels = 0;
+		Map<String,UmlRelationshipElement> rels =
+				new HashMap<String,UmlRelationshipElement>();
+		
 		for(RelationshipLink rl : mAllRelationships){
 			RelationshipType relType = null;
 			switch(rl.getLinkType()){
@@ -314,10 +345,12 @@ public class SrcmlSaxHandler extends DefaultHandler {
 			if(relType != null){
 				UmlRelationshipElement r = new UmlRelationshipElement("", mIdQualifiedNameMap.get(rl.getHeadName()), 
 						mIdQualifiedNameMap.get(rl.getTailName()), relType);
-				rels.add(r);
+				if(r.getHeadId() != null && r.getHeadId().length() > 0
+						&& r.getTailId() != null && r.getTailId().length() > 0){
+					rels.put(IDBASE_RELATIONSHIP + String.valueOf(++numRels), r);
+				}
 			}
 		}
-		
 		return rels;
 	}
 	
