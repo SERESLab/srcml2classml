@@ -1,14 +1,14 @@
-package com.onionuml.convert.srcml;
+package edu.ysu.onionuml.convert.srcml;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.onionuml.convert.srcml.RelationshipLink.LinkType;
-import com.onionuml.visplugin.core.UmlAttribute;
-import com.onionuml.visplugin.core.UmlClassElement;
-import com.onionuml.visplugin.core.UmlOperation;
-import com.onionuml.visplugin.core.UmlOperationParameter;
-import com.onionuml.visplugin.core.Visibility;
+import edu.ysu.onionuml.convert.srcml.RelationshipLink.LinkType;
+import edu.ysu.onionuml.core.UmlAttribute;
+import edu.ysu.onionuml.core.UmlClassElement;
+import edu.ysu.onionuml.core.UmlOperation;
+import edu.ysu.onionuml.core.UmlOperationParameter;
+import edu.ysu.onionuml.core.Visibility;
 
 /**
  * Models a srcml class container.

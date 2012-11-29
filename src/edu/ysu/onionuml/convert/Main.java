@@ -1,4 +1,4 @@
-package com.onionuml.convert;
+package edu.ysu.onionuml.convert;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
-import com.onionuml.visplugin.core.UmlClassModel;
+import edu.ysu.onionuml.core.UmlClassModel;
 
 public class Main {
 	

@@ -1,4 +1,4 @@
-package com.onionuml.convert.srcml;
+package edu.ysu.onionuml.convert.srcml;
 
 import java.util.ArrayList;
 import java.util.List;

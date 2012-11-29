@@ -1,6 +1,6 @@
 OVERVIEW
 ========
-The srcml2classml project is a program that converts Java projects represented in srcML (http://www.sdml.info/projects/srcml/) to ClassML. Sources require the com.onionuml.visplugin.core package from the OnionUmlVisualization plugin project.
+The srcml2classml project is a program that converts Java projects represented in srcML (http://www.sdml.info/projects/srcml/) to ClassML. Sources require the edu.ysu.onionuml.core package from the OnionUmlVisualization plugin project.
 
 
 LICENSE

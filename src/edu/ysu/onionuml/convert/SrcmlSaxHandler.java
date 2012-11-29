@@ -1,4 +1,4 @@
-package com.onionuml.convert;
+package edu.ysu.onionuml.convert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,26 +12,26 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.onionuml.convert.srcml.Argument;
-import com.onionuml.convert.srcml.ClassElement;
-import com.onionuml.convert.srcml.Declaration;
-import com.onionuml.convert.srcml.Function;
-import com.onionuml.convert.srcml.IArgumentListContainer;
-import com.onionuml.convert.srcml.IDeclarationContainer;
-import com.onionuml.convert.srcml.INamed;
-import com.onionuml.convert.srcml.IParameterListContainer;
-import com.onionuml.convert.srcml.ISpecified;
-import com.onionuml.convert.srcml.ITyped;
-import com.onionuml.convert.srcml.InitializationType;
-import com.onionuml.convert.srcml.Name;
-import com.onionuml.convert.srcml.Parameter;
-import com.onionuml.convert.srcml.RelationshipLink;
-import com.onionuml.convert.srcml.RelationshipLink.LinkType;
-import com.onionuml.convert.srcml.Type;
-import com.onionuml.visplugin.core.RelationshipType;
-import com.onionuml.visplugin.core.UmlClassElement;
-import com.onionuml.visplugin.core.UmlPackageElement;
-import com.onionuml.visplugin.core.UmlRelationshipElement;
+import edu.ysu.onionuml.convert.srcml.Argument;
+import edu.ysu.onionuml.convert.srcml.ClassElement;
+import edu.ysu.onionuml.convert.srcml.Declaration;
+import edu.ysu.onionuml.convert.srcml.Function;
+import edu.ysu.onionuml.convert.srcml.IArgumentListContainer;
+import edu.ysu.onionuml.convert.srcml.IDeclarationContainer;
+import edu.ysu.onionuml.convert.srcml.INamed;
+import edu.ysu.onionuml.convert.srcml.IParameterListContainer;
+import edu.ysu.onionuml.convert.srcml.ISpecified;
+import edu.ysu.onionuml.convert.srcml.ITyped;
+import edu.ysu.onionuml.convert.srcml.InitializationType;
+import edu.ysu.onionuml.convert.srcml.Name;
+import edu.ysu.onionuml.convert.srcml.Parameter;
+import edu.ysu.onionuml.convert.srcml.RelationshipLink;
+import edu.ysu.onionuml.convert.srcml.RelationshipLink.LinkType;
+import edu.ysu.onionuml.convert.srcml.Type;
+import edu.ysu.onionuml.core.RelationshipType;
+import edu.ysu.onionuml.core.UmlClassElement;
+import edu.ysu.onionuml.core.UmlPackageElement;
+import edu.ysu.onionuml.core.UmlRelationshipElement;
 
 /**
  * Handles SAX2 events for reading a class model from a SrcML

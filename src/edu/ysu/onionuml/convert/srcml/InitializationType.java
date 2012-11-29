@@ -1,4 +1,4 @@
-package com.onionuml.convert.srcml;
+package edu.ysu.onionuml.convert.srcml;
 
 /**
  * Represents the object type of the initialization statement.
