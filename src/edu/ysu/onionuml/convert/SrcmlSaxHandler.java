@@ -70,8 +70,14 @@ public class SrcmlSaxHandler extends DefaultHandler {
 		mElementNames.push(qName);
 		
 		
-		if(qName.equals("class")){
-			String stereotype = attributes.getValue("type");
+		if(qName.equals("class") || qName.equals("enum")){
+			String stereotype = "";
+			if(qName.equals("class")){
+				stereotype = attributes.getValue("type");
+			}
+			else if(qName.equals("enum")){
+				stereotype = "enum";
+			}
 			ClassElement c = new ClassElement(IDBASE_CLASS + String.valueOf(++mNumClasses),
 					mLastPackageName, (stereotype != null ? stereotype : ""));
 			c.setImports(mLastImports);
@@ -118,14 +124,14 @@ public class SrcmlSaxHandler extends DefaultHandler {
 			mObjects.push("");
 		}
 	}
-
+	
 	@Override
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		
 		mElementNames.pop();
 		
-		if(qName.equals("class")){
+		if(qName.equals("class") || qName.equals("enum")){
 			ClassElement c = (ClassElement)mObjects.pop();
 			UmlClassElement e = c.toUmlClassElement();
 			if(e != null){
@@ -257,7 +263,6 @@ public class SrcmlSaxHandler extends DefaultHandler {
 				mObjects.push(InitializationType.parseInitType(expr));
 			}
 		}
-		
 	}
 	
 	@Override
@@ -454,6 +459,9 @@ public class SrcmlSaxHandler extends DefaultHandler {
 		if(parentElement.equals("class")){
 			return true;
 		}
+		if(parentElement.equals("enum")){
+			return true;
+		}
 		if(parentElement.equals("decl")){
 			return true;
 		}
@@ -492,6 +500,9 @@ public class SrcmlSaxHandler extends DefaultHandler {
 		
 		String parentElement = (mElementNames.size() > 0 ? mElementNames.peek() : "");
 		if(parentElement.equals("class")){
+			return true;
+		}
+		if(parentElement.equals("enum")){
 			return true;
 		}
 		if(parentElement.equals("type")){
